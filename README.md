@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Optisafe.fr
 
-## Getting Started
+> SaaS de comparaison de contrats d'assurance avec détection de doublons inter-contrats et fiche d'urgence intelligente.
 
-First, run the development server:
+## 🚀 Déploiement sur le VPS
+
+### Prérequis
+
+- Docker & Docker Compose installés
+- Traefik v3.1 en fonctionnement sur le réseau `audit-app_web`
+- Le sous-domaine `optisafe.alsek.fr` (ou `optisafe.fr`) pointant vers le VPS
+
+### Étapes
+
+1. **Cloner le dépôt** sur le VPS :
+   ```bash
+   git clone <url-du-repo> /opt/optisafe
+   cd /opt/optisafe
+   ```
+
+2. **Configurer les variables d'environnement** :
+   ```bash
+   cp .env.example .env
+   nano .env   # Renseigner les vraies valeurs (DB, JWT_SECRET, GEMINI_API_KEY)
+   ```
+
+3. **Lancer l'application** :
+   ```bash
+   docker compose up -d --build
+   ```
+
+4. **Initialiser la base de données** (première fois uniquement) :
+   ```bash
+   docker compose exec app npx prisma migrate deploy
+   ```
+
+5. **Vérifier** :
+   - L'application doit être accessible sur `https://optisafe.alsek.fr`
+   - Vérifier les logs : `docker compose logs -f app`
+
+### Mise à jour
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd /opt/optisafe
+git pull
+docker compose up -d --build
+docker compose exec app npx prisma migrate deploy  # si des migrations ont été ajoutées
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Sauvegardes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Base de données
+```bash
+docker compose exec db pg_dump -U optisafe optisafe > backup_$(date +%Y%m%d).sql
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### Fichiers contrats
+```bash
+# Les fichiers sont dans le volume Docker "contracts"
+docker run --rm -v optisafe_contracts:/data -v $(pwd)/backups:/backup alpine tar czf /backup/contracts_$(date +%Y%m%d).tar.gz /data
+```
 
-## Learn More
+### Passage en production (`optisafe.fr`)
 
-To learn more about Next.js, take a look at the following resources:
+1. Modifier le DNS pour pointer `optisafe.fr` vers le VPS
+2. Mettre à jour `.env` :
+   ```
+   APP_DOMAIN=optisafe.fr
+   NEXT_PUBLIC_APP_URL=https://optisafe.fr
+   ```
+3. Redéployer : `docker compose up -d --build`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Développement local
 
-## Deploy on Vercel
+```bash
+npm install
+cp .env.example .env  # Configurer pour le dev local
+npx prisma generate
+npx prisma migrate dev
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📁 Structure du projet
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+├── docker-compose.yml      # Services Docker (app, worker, db, redis)
+├── Dockerfile              # Build multi-stage
+├── prisma/schema.prisma    # Schéma base de données
+├── src/
+│   ├── app/                # Pages Next.js (App Router)
+│   │   ├── (auth)/         # Login, Register
+│   │   ├── (app)/          # Dashboard, Contrats, Comparaison, Doublons, Urgence, IA
+│   │   └── api/            # API routes
+│   ├── components/         # Composants React
+│   │   ├── ui/             # Design system (Button, Card, Badge, Input, Modal…)
+│   │   └── domain/         # Composants métier
+│   ├── lib/                # Logique partagée
+│   │   ├── taxonomy/       # Référentiel de garanties (5 familles, tags transversaux)
+│   │   ├── services/       # Services métier (comparaison, doublons, extraction…)
+│   │   ├── auth/           # Authentification JWT
+│   │   └── db/             # Client Prisma
+│   └── worker/             # Worker BullMQ (extraction IA asynchrone)
+└── docs/                   # Documentation projet
+```
+
+## 🔑 Variables d'environnement
+
+Voir [.env.example](.env.example) pour la liste complète.

@@ -1,0 +1,62 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(13, 71, 161, 0.05) 0%, rgba(38, 166, 154, 0.1) 100%);
+  padding: var(--spacing-4);
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--spacing-8) !important;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: var(--spacing-6);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  display: block;
+}
+
+.logoDot {
+  color: var(--color-secondary);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: var(--spacing-6);
+  font-size: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.submitBtn {
+  margin-top: var(--spacing-2);
+  width: 100%;
+}
+
+.linkText {
+  text-align: center;
+  margin-top: var(--spacing-6);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.link {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,213 @@
+// Prisma schema for Optisafe.fr
+// PostgreSQL 16 + pgvector extension
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+// ============================================
+// User
+// ============================================
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  contracts      Contract[]
+  emergencyCards EmergencyCard[]
+  duplicatePairs DuplicatePair[]
+
+  @@map("users")
+}
+
+// ============================================
+// Contract
+// ============================================
+enum ContractType {
+  MRH
+  AUTO
+  SANTE
+  CB
+  GAV
+}
+
+enum ContractSource {
+  upload
+  manual
+}
+
+model Contract {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  insurerName    String         @map("insurer_name")
+  contractType   ContractType   @map("contract_type")
+  contractNumber String?        @map("contract_number")
+  monthlyPremium Decimal?       @map("monthly_premium") @db.Decimal(10, 2)
+  startDate      DateTime?      @map("start_date") @db.Date
+  endDate        DateTime?      @map("end_date") @db.Date
+  source         ContractSource
+  filePath       String?        @map("file_path")
+  rawExtractedData Json?        @map("raw_extracted_data")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guarantees     Guarantee[]
+  documentChunks DocumentChunk[]
+
+  @@index([userId])
+  @@map("contracts")
+}
+
+// ============================================
+// Guarantee
+// ============================================
+enum CeilingUnit {
+  per_event
+  per_year
+}
+
+enum DeductibleType {
+  fixed
+  percentage
+}
+
+model Guarantee {
+  id              String          @id @default(uuid()) @db.Uuid
+  contractId      String          @map("contract_id") @db.Uuid
+  taxonomyId      String          @map("taxonomy_id")
+  originalLabel   String          @map("original_label")
+  covered         Boolean         @default(true)
+  ceiling         Decimal?        @db.Decimal(12, 2)
+  ceilingUnit     CeilingUnit?    @map("ceiling_unit")
+  deductible      Decimal?        @db.Decimal(10, 2)
+  deductibleType  DeductibleType? @map("deductible_type")
+  waitingPeriodDays Int?          @map("waiting_period_days")
+  conditions      String?
+  sourceClause    String?         @map("source_clause")
+
+  contract        Contract              @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  crossTags       GuaranteeCrossTag[]
+  duplicatePairsA DuplicatePair[]       @relation("guaranteeA")
+  duplicatePairsB DuplicatePair[]       @relation("guaranteeB")
+
+  @@index([contractId])
+  @@index([taxonomyId])
+  @@map("guarantees")
+}
+
+// ============================================
+// GuaranteeCrossTag — Tags transversaux
+// ============================================
+enum CrossTag {
+  RESPONSABILITE_CIVILE
+  ACCIDENT_CORPOREL
+  VOL
+  VOYAGE
+  PROTECTION_JURIDIQUE
+  ASSISTANCE
+  BRIS
+  CATASTROPHE_NAT
+}
+
+model GuaranteeCrossTag {
+  id          String   @id @default(uuid()) @db.Uuid
+  guaranteeId String   @map("guarantee_id") @db.Uuid
+  crossTag    CrossTag @map("cross_tag")
+
+  guarantee Guarantee @relation(fields: [guaranteeId], references: [id], onDelete: Cascade)
+
+  @@unique([guaranteeId, crossTag])
+  @@index([crossTag])
+  @@map("guarantee_cross_tags")
+}
+
+// ============================================
+// DuplicatePair — Doublons détectés
+// ============================================
+enum DuplicateStatus {
+  new_duplicate @map("new")
+  seen
+  ignored
+  resolved
+}
+
+model DuplicatePair {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @map("user_id") @db.Uuid
+  guaranteeAId    String          @map("guarantee_a_id") @db.Uuid
+  guaranteeBId    String          @map("guarantee_b_id") @db.Uuid
+  sharedCrossTag  CrossTag        @map("shared_cross_tag")
+  overlapScore    Decimal         @map("overlap_score") @db.Decimal(3, 2)
+  status          DuplicateStatus @default(new_duplicate)
+  potentialSaving Decimal?        @map("potential_saving") @db.Decimal(10, 2)
+  detectedAt      DateTime        @default(now()) @map("detected_at")
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guaranteeA Guarantee @relation("guaranteeA", fields: [guaranteeAId], references: [id], onDelete: Cascade)
+  guaranteeB Guarantee @relation("guaranteeB", fields: [guaranteeBId], references: [id], onDelete: Cascade)
+
+  @@unique([guaranteeAId, guaranteeBId, sharedCrossTag])
+  @@index([userId, status])
+  @@map("duplicate_pairs")
+}
+
+// ============================================
+// DocumentChunk — Texte indexé pour RAG
+// ============================================
+model DocumentChunk {
+  id         String                      @id @default(uuid()) @db.Uuid
+  contractId String                      @map("contract_id") @db.Uuid
+  chunkIndex Int                         @map("chunk_index")
+  content    String
+  embedding  Unsupported("vector(768)")?
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId])
+  @@map("document_chunks")
+}
+
+// ============================================
+// EmergencyCard — Fiche d'urgence
+// ============================================
+model EmergencyCard {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  contractType ContractType @map("contract_type")
+  generatedAt  DateTime @default(now()) @map("generated_at")
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cases EmergencyCase[]
+
+  @@unique([userId, contractType])
+  @@map("emergency_cards")
+}
+
+// ============================================
+// EmergencyCase — Cas d'urgence
+// ============================================
+model EmergencyCase {
+  id              String  @id @default(uuid()) @db.Uuid
+  cardId          String  @map("card_id") @db.Uuid
+  caseType        String  @map("case_type")
+  whatToDo        String  @map("what_to_do")
+  whoToCall       String  @map("who_to_call")
+  coverageSummary String  @map("coverage_summary")
+  isAiGenerated   Boolean @default(false) @map("is_ai_generated")
+  sourceClause    String? @map("source_clause")
+
+  card EmergencyCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@map("emergency_cases")
+}

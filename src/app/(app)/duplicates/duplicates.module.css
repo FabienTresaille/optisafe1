@@ -1,0 +1,152 @@
+.container {
+  padding: 2rem 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.8rem;
+  color: var(--color-primary);
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.filterBtn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-bg);
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.filterBtn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.duplicateCard {
+  background: rgba(38, 166, 154, 0.1);
+  border: 1px solid rgba(38, 166, 154, 0.3);
+  padding: 1.5rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding-bottom: 1rem;
+}
+
+.overlapInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.overlapBarContainer {
+  width: 150px;
+  height: 8px;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.overlapBar {
+  height: 100%;
+  background: var(--color-secondary);
+}
+
+.overlapText {
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+.comparisonArea {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.contractSide {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.contractName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.guaranteeLabel {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.guaranteeDetails {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.vsBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vsCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .comparisonArea {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .vsBadge {
+    transform: rotate(90deg);
+    margin: 0 auto;
+  }
+}
