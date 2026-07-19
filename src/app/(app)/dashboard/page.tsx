@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -12,25 +13,33 @@ export default function DashboardPage() {
           <h1 className={styles.title}>Bonjour, Jean 👋</h1>
           <p className={styles.subtitle}>Voici un résumé de vos assurances aujourd'hui.</p>
         </div>
-        <Button variant="primary">+ Ajouter un contrat</Button>
+        <Link href="/contracts/new">
+          <Button variant="primary">+ Ajouter un contrat</Button>
+        </Link>
       </div>
 
       <div className={styles.statsGrid}>
-        <Card className={styles.statCard}>
-          <div className={styles.statIconWrapper}>📄</div>
-          <div className={styles.statValue}>4</div>
-          <div className={styles.statLabel}>Contrats analysés</div>
-        </Card>
-        <Card className={styles.statCard} variant="highlighted">
-          <div className={styles.statIconWrapper}>⚠️</div>
-          <div className={styles.statValue}>2</div>
-          <div className={styles.statLabel}>Doublons détectés</div>
-        </Card>
-        <Card className={styles.statCard}>
-          <div className={styles.statIconWrapper}>🚑</div>
-          <div className={styles.statValue}>1</div>
-          <div className={styles.statLabel}>Fiche Urgence générée</div>
-        </Card>
+        <Link href="/contracts" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Card className={styles.statCard}>
+            <div className={styles.statIconWrapper}>📄</div>
+            <div className={styles.statValue}>4</div>
+            <div className={styles.statLabel}>Contrats analysés</div>
+          </Card>
+        </Link>
+        <Link href="/duplicates" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Card className={styles.statCard} variant="highlighted">
+            <div className={styles.statIconWrapper}>⚠️</div>
+            <div className={styles.statValue}>2</div>
+            <div className={styles.statLabel}>Doublons détectés</div>
+          </Card>
+        </Link>
+        <Link href="/emergency" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Card className={styles.statCard}>
+            <div className={styles.statIconWrapper}>🚑</div>
+            <div className={styles.statValue}>1</div>
+            <div className={styles.statLabel}>Fiche Urgence générée</div>
+          </Card>
+        </Link>
       </div>
 
       <div className={styles.mainGrid}>
@@ -68,12 +77,16 @@ export default function DashboardPage() {
             <Card className={styles.actionCard}>
               <h3>Comparer des contrats</h3>
               <p>Sélectionnez deux contrats pour voir les différences de garanties.</p>
-              <Button variant="secondary" className={styles.actionBtn}>Comparer</Button>
+              <Link href="/compare">
+                <Button variant="secondary" className={styles.actionBtn}>Comparer</Button>
+              </Link>
             </Card>
             <Card className={styles.actionCard}>
               <h3>Fiche d'Urgence</h3>
               <p>Mettez à jour ou imprimez votre fiche d'urgence avec vos numéros vitaux.</p>
-              <Button variant="emergency" className={styles.actionBtn}>Générer la fiche</Button>
+              <Link href="/emergency">
+                <Button variant="emergency" className={styles.actionBtn}>Générer la fiche</Button>
+              </Link>
             </Card>
           </div>
         </div>
