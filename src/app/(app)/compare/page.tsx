@@ -33,7 +33,7 @@ export default function ComparePage() {
         const res = await fetch('/api/contracts');
         if (res.ok) {
           const data = await res.json();
-          setContracts(data);
+          setContracts(data.contracts || []);
         }
       } catch (error) {
         console.error('Error fetching contracts:', error);
