@@ -39,10 +39,9 @@ const extractionWorker = new Worker(
       
       if (filePath.endsWith('.pdf')) {
         // Use pdf-parse for PDF files
-        // @ts-ignore
-        const pdfParseModule = await import('pdf-parse');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pdfParse = (pdfParseModule.default || pdfParseModule) as any;
+        const pdfParseModule = (await import('pdf-parse')) as any;
+        const pdfParse = pdfParseModule.default || pdfParseModule;
         const pdfData = await pdfParse(fileBuffer);
         extractedText = pdfData.text;
       } else {
