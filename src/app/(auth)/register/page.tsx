@@ -30,7 +30,7 @@ export default function RegisterPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Erreur lors de l\\'inscription');
+        throw new Error(data.error || "Erreur lors de l'inscription");
       }
 
       router.push('/dashboard');
