@@ -39,9 +39,9 @@ const extractionWorker = new Worker(
       
       if (filePath.endsWith('.pdf')) {
         // Use pdf-parse for PDF files
-        // @ts-expect-error - pdf-parse types are not fully compatible with dynamic import
+        // @ts-ignore - pdf-parse types are not fully compatible with dynamic import
         const pdfParseModule = await import('pdf-parse');
-        // @ts-expect-error
+        // @ts-ignore
         const pdfParse = pdfParseModule.default || pdfParseModule;
         const pdfData = await pdfParse(fileBuffer);
         extractedText = pdfData.text;
