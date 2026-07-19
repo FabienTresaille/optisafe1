@@ -13,9 +13,7 @@ export default function DashboardPage() {
           <h1 className={styles.title}>Bonjour, Jean 👋</h1>
           <p className={styles.subtitle}>Voici un résumé de vos assurances aujourd'hui.</p>
         </div>
-        <Link href="/contracts/new">
-          <Button variant="primary">+ Ajouter un contrat</Button>
-        </Link>
+        <Button href="/contracts/new" variant="primary">+ Ajouter un contrat</Button>
       </div>
 
       <div className={styles.statsGrid}>
@@ -77,16 +75,12 @@ export default function DashboardPage() {
             <Card className={styles.actionCard}>
               <h3>Comparer des contrats</h3>
               <p>Sélectionnez deux contrats pour voir les différences de garanties.</p>
-              <Link href="/compare">
-                <Button variant="secondary" className={styles.actionBtn}>Comparer</Button>
-              </Link>
+              <Button href="/compare" variant="secondary" className={styles.actionBtn}>Comparer</Button>
             </Card>
             <Card className={styles.actionCard}>
               <h3>Fiche d'Urgence</h3>
               <p>Mettez à jour ou imprimez votre fiche d'urgence avec vos numéros vitaux.</p>
-              <Link href="/emergency">
-                <Button variant="emergency" className={styles.actionBtn}>Générer la fiche</Button>
-              </Link>
+              <Button href="/emergency" variant="emergency" className={styles.actionBtn}>Générer la fiche</Button>
             </Card>
           </div>
         </div>
